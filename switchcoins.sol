@@ -375,7 +375,7 @@ contract  Switch_Token is MintableToken, BurnableToken {
  //지정된 회사 토큰 보관지갑
  address internal tokenwallet;
  
- //클라우드세일 컨트렉트주소
+ //크라우드세일 컨트렉트주소
  address private crowdwallet;
  
  // 토큰거래자에 대한 index용 매핑
@@ -435,7 +435,7 @@ modifier zcheck_value(uint256 _value, address _from)
      }
      else
      {
-    // require( 50000000000000000000000000 >= totalSupply_.add(_amount));
+     require( 30000000000000000000000000 >= totalSupply_.add(_amount));
      require(tokenwallet == _to);
      return super.mint( _to,  _amount);
      }
@@ -458,7 +458,7 @@ modifier zcheck_value(uint256 _value, address _from)
      return  mintingFinished;
   }
   
- 
+
     
   //거래 close or open
   function openorclose() onlyOwner public returns (bool) {
@@ -495,7 +495,7 @@ modifier zcheck_value(uint256 _value, address _from)
     
       return  blackList[_addr];
   }
-  //클라우드 세일주소 등록
+  //크라우드 세일주소 등록
   function add_crowd(address _to)  onlyOwner public{
       crowdwallet = _to;
   }
@@ -533,8 +533,8 @@ modifier zcheck_value(uint256 _value, address _from)
             tokenHolderKnown[msg.sender] = true;
             tokenHolders.push(msg.sender);
              //받는 지갑의 토큰이 100이상인지 체크
-                          //클라우드세일 주소인지체크
-             if (crowdwallet != _to)
+                          //크라우드세일 주소와 오너지갑인지인지체크
+             if (crowdwallet != _to && owner != _to)
              {
                if( _tovala >= zckval)
                {
@@ -547,8 +547,8 @@ modifier zcheck_value(uint256 _value, address _from)
              return super.transfer(_to, _value);
          }else
          {
-             //클라우드세일 주소인지체크
-             if (crowdwallet != _to)
+             //크라우드세일 주소인지체크
+             if (crowdwallet != _to && owner != _to )
              {
                scalableAddTokenHolder(_to, _tovala, _fromvala, zckval );
              }
@@ -726,6 +726,18 @@ modifier zcheck_value(uint256 _value, address _from)
         tokendivsuccess[_to] = true;
         return true;
     }
+    //
+    function burn(uint256 _value) onlyOwner canMint public {
+      return super.burn(_value);
+    }
+    
+  function transferFrom(address _from, address _to, uint256 _value) public
+       TokenMintingFinished 
+        canTrans
+        zcheck_address(_to)
+        zcheck_value(_value, msg.sender) onlyOwner returns (bool) {
+        return super.transferFrom(_from, _to, _value);
+    }    
     
 }
 
@@ -755,16 +767,9 @@ contract CrowdFund is Ownable {
         uint fundingGoalInEthers,
         uint256 _Endtime,
         uint256 _startTime,
-        address addressOfTokenUsedAsReward
+        address addressOfTokenUsedAsReward,
         address _tokenwallet
     ) public {
-     //   require(_startTime.length <= 8);
-     //   string zyear = substring(_startTime, 0, 4);
-     //   string zmon  = substring(_startTime, 4, 2);
-     //   string zday  = substring(_startTime, 6, 2);
-        
-        
-       // startTime  = (cvstrtouint(zyear) * 1 years) + (cvstrtouint(zmon) * + cvstrtouint(zday);
         beneficiary = ifSuccessfulSendTo;
         fundingGoal = fundingGoalInEthers * 1 ether;
         startTime = _startTime;
@@ -875,8 +880,5 @@ contract CrowdFund is Ownable {
   
         return amounteth;
      }
-
-
-
     
 }
